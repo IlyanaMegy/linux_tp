@@ -1,0 +1,45 @@
+Vagrant.configure("2") do |config|
+  
+  config.vm.box = "b2-tp2-centos"
+  config.vm.provision "shell", path: "tools_install.sh"
+
+  config.vm.define "node1" do |node1|
+    node1.vm.provider "virtualbox" do |v|
+      v.name = "node1"
+      v.memory = 1024  
+      v.cpus = 2
+    end
+
+    #importer le fichier nginx_conf_script.sh depuis windows vers la VM
+    node1.vm.provision "file", source: "C:/Users/black/Documents/vagrant/nginx_conf_script.sh", destination: "nginx.conf"
+    node1.vm.hostname = "node1.tp2.b2"
+    node1.vm.network "private_network", ip: "192.168.2.21"
+
+    # Exécution d'un script au démarrage de la VM
+    node1.vm.provision "shell", path: "tp1_script.sh"
+  end
+
+  config.vm.define "node2" do |node2|
+    node2.vm.provider "virtualbox" do |v|
+      v.name = "node2"
+      v.memory = 512  
+      v.cpus = 2
+    end
+
+    node2.vm.hostname = "node2.tp2.b2"
+    node2.vm.network "private_network", ip: "192.168.2.22"
+    node2.vm.provision "shell", path: "hosts.sh"
+  end
+
+  # Ajoutez cette ligne afin d'accélérer le démarrage de la VM (si une erreur 'vbguest' est levée, voir la note un peu plus bas)
+  config.vbguest.auto_update = false 
+
+  # Désactive les updates auto qui peuvent ralentir le lancement de la machine   
+  config.vm.box_check_update = false
+
+  
+
+  # La ligne suivante permet de désactiver le montage d'un dossier partagé (ne marche pas tout le temps directement suivant vos OS, versions d'OS, etc.)   
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
+end

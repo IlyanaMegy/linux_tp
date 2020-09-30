@@ -1,0 +1,25 @@
+Vagrant.configure("2") do |config|
+  config.vm.define "tp2VM" do |tp2vm|
+    tp2vm.vm.box = "centos/7"
+    tp2vm.vm.provider "virtualbox" do |v|
+      v.name = "vmtp2"
+      v.memory = 1024  
+      v.cpus = 2
+    end
+    tp2vm.vm.hostname = "vmtp2"
+    
+    tp2vm.vm.network :private_network, ip: "192.168.2.11", netmask:"255.255.255.0"  
+
+    # Ajoutez cette ligne afin d'accélérer le démarrage de la VM (si une erreur 'vbguest' est levée, voir la note un peu plus bas)
+    tp2vm.vbguest.auto_update = false 
+
+    # Désactive les updates auto qui peuvent ralentir le lancement de la machine   
+    tp2vm.vm.box_check_update = false
+
+    # Exécution d'un script au démarrage de la VM
+    tp2vm.vm.provision "shell", path: "vim_install.sh"
+
+    # La ligne suivante permet de désactiver le montage d'un dossier partagé (ne marche pas tout le temps directement suivant vos OS, versions d'OS, etc.)   
+    tp2vm.vm.synced_folder ".", "/vagrant", disabled: true
+  end  
+end
