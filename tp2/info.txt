@@ -1,0 +1,3 @@
+TP non fini
+manque le CA pour https sur la machine client.
+du coup la commande curl que tu dois faire donnera surement rien sans le "-k"
