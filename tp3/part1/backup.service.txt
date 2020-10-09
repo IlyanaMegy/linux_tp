@@ -1,0 +1,14 @@
+[Unit]
+Description=backup site1 et site2
+
+[Service]
+Type=simple
+User=backup
+PIDfile=/tmp/backup.pid
+
+ExecStartPre=/home/backup/prebackup_script.sh
+ExecStart=/home/backup/backup_script.sh
+ExecStartPost=/home/backup/postbackup_script.sh
+
+[Install]
+WantedBy=multi-user.target

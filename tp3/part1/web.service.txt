@@ -1,0 +1,17 @@
+[Unit]
+Description=Start network service
+
+[Service]
+Type=simple
+Environnement=PORT=80
+User=root
+
+ExecStartPre=/bin/sudo /usr/bin/firewall-cmd --zone=public --permanent --add-port $PORT/tcp
+ExecStartPre=/bin/sudo /usr/bin/firewall-cmd --reload
+ExecStart=/bin/sudo /bin/python2 -m SimpleHTTPServer $PORT
+ExecStartPost=/bin/sudo /usr/bin/firewall-cmd --zone=public --permanent --remove-port $PORT/tcp
+ExecStartPost=/bin/sudo /usr/bin/firewall-cmd --reload
+#Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
