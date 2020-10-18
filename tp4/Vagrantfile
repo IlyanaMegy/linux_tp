@@ -1,0 +1,152 @@
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "centos/7"
+  config.vm.provision "shell", path: "tools_install.sh"
+
+
+  config.vm.define "node1" do |node1|
+    node1.vm.provider "virtualbox" do |v|
+      v.name = "node1"
+      v.memory = 1024
+      v.cpus = 2
+    end
+
+    #importer le fichier nginx_conf_script.sh depuis windows vers la VM
+    node1.vm.provision "file", source: "C:/Users/black/Documents/vagrant/nginx_conf_script.sh", destination: "nginx.conf"
+    node1.vm.hostname = "node1"
+    node1.vm.network "private_network", ip: "192.168.2.21"
+
+    #Exécution d'un script au démarrage de la VM
+    node1.vm.provision "shell", path: "tp1_script.sh"
+  end
+
+  config.vm.define "node2" do |node2|
+    node2.vm.provider "virtualbox" do |v|
+      v.name = "node2"
+      v.memory = 512
+      v.cpus = 2
+    end
+
+    node2.vm.hostname = "node2.tp2.b2"
+    node2.vm.network "private_network", ip: "192.168.2.22"
+    #host missing
+  end
+
+#---------------------------------------------------------------------------------
+
+##################################################################################
+#################################  TP3 : systemd #################################
+##################################################################################
+
+
+  config.vm.define "vmtp3" do |vmtp3|
+    vmtp3.vm.provider "virtualbox" do |v|
+      v.name = "vmtp3"
+      v.memory = 512
+      v.cpus = 2
+    end
+
+    vmtp3.vm.hostname = "vmtp3"
+    vmtp3.vm.network "private_network", ip: "192.168.2.23"
+  end
+
+#--------------------------------------------------------------------------------
+
+#################################################################################
+#########################  TP4 : Déploiement multi-noeud ########################
+#################################################################################
+
+  config.vm.define "nginxserv" do |nginxserv|
+    nginxserv.vm.provider "virtualbox" do |v|
+      v.name = "nginxserv"
+      v.memory = 1024
+      v.cpus = 2
+    end
+
+    #backup
+    nginxserv.vm.provision "file", source: "C:/Users/black/Documents/vagrant/postbackup_nginx.sh", destination: "/home/vagrant"
+    nginxserv.vm.provision "file", source: "C:/Users/black/Documents/vagrant/backup_nginx.sh", destination: "/home/vagrant"
+    nginxserv.vm.provision "file", source: "C:/Users/black/Documents/vagrant/backup.service_nginx.txt", destination: "/etc/systemd/system/backup.service"
+    nginxserv.vm.provision "file", source: "C:/Users/black/Documents/vagrant/backup.timer.txt", destination: "/etc/systemd/system/backup.timer"
+
+    #importer le fichier nginx_conf_script.sh depuis windows vers la VM
+    nginxserv.vm.provision "file", source: "C:/Users/black/Documents/vagrant/nginx_conf_tp4.sh", destination: "nginx.conf"
+    nginxserv.vm.hostname = "nginxserv"
+    nginxserv.vm.network "private_network", ip: "192.168.4.11"
+
+    #Exécution d'un script au démarrage de la VM
+    nginxserv.vm.provision "shell", path: "nginx_setup.sh"
+    nginxserv.vm.provision "shell", path: "hosts.sh"
+    nginxserv.vm.provision "shell", path: "nfs_client_setup.sh"
+
+  end
+
+#---
+
+  config.vm.define "giteaserv" do |giteaserv|
+    giteaserv.vm.provider "virtualbox" do |v|
+      v.name = "giteaserv"
+      v.memory = 1024
+      v.cpus = 2
+    end
+
+    #backup
+    giteaserv.vm.provision "file", source: "C:/Users/black/Documents/vagrant/postbackup_gitea.sh", destination: "/home/vagrant"
+    giteaserv.vm.provision "file", source: "C:/Users/black/Documents/vagrant/backup_gitea.sh", destination: "/home/vagrant"
+    giteaserv.vm.provision "file", source: "C:/Users/black/Documents/vagrant/backup.service_gitea.txt", destination: "/etc/systemd/system/backup.service"
+    giteaserv.vm.provision "file", source: "C:/Users/black/Documents/vagrant/backup.timer.txt", destination: "/etc/systemd/system/backup.timer"
+
+    giteaserv.vm.hostname = "giteaserv"
+    giteaserv.vm.network "private_network", ip: "192.168.4.12"
+    giteaserv.vm.provision "file", source: "C:/Users/black/Documents/vagrant/gitea.service.txt", destination: "gitea.service"
+    giteaserv.vm.provision "shell", path: "gitea_conf.sh"
+    giteaserv.vm.provision "shell", path: "hosts.sh"
+    giteaserv.vm.provision "shell", path: "nfs_client_setup.sh"
+
+    end
+
+  config.vm.define "bddserv" do |bddserv|
+    bddserv.vm.provider "virtualbox" do |v|
+      v.name = "bddserv"
+      v.memory = 1024
+      v.cpus = 2
+    end
+
+    #backup
+    bddserv.vm.provision "file", source: "C:/Users/black/Documents/vagrant/postbackup_bdd.sh", destination: "/home/vagrant"
+    bddserv.vm.provision "file", source: "C:/Users/black/Documents/vagrant/backup_bdd.sh", destination: "/home/vagrant"
+    bddserv.vm.provision "file", source: "C:/Users/black/Documents/vagrant/backup.service_bdd.txt", destination: "/etc/systemd/system/backup.service"
+    bddserv.vm.provision "file", source: "C:/Users/black/Documents/vagrant/backup.timer.txt", destination: "/etc/systemd/system/backup.timer"
+  
+    bddserv.vm.hostname = "bddserv"
+    bddserv.vm.network "private_network", ip: "192.168.4.13"
+    bddserv.vm.provision "shell", path: "mariadb_setup.sh"
+    bddserv.vm.provision "shell", path: "hosts.sh"
+    bddserv.vm.provision "shell", path: "nfs_client_setup.sh"
+   end
+
+  config.vm.define "nfsserv" do |nfsserv|
+    nfsserv.vm.provider "virtualbox" do |v|
+      v.name = "nfsserv"
+      v.memory = 1024
+      v.cpus = 2
+    end
+
+    nfsserv.vm.hostname = "nfsserv"
+    nfsserv.vm.network "private_network", ip: "192.168.4.14"
+    nfsserv.vm.provision "shell", path: "hosts.sh"
+    nfsserv.vm.provision "shell", path: "nfs_server_setup.sh"
+  end
+    
+ 
+#--------------------------------------------------------------------------------
+ 
+ #Ajoutez cette ligne afin d'accélérer le démarrage de la VM (si une erreur 'vbguest' est levée, voir la note un peu plus bas)
+ config.vbguest.auto_update = false 
+
+ #Désactive les updates auto qui peuvent ralentir le lancement de la machine 
+ config.vm.box_check_update = false
+
+ #La ligne suivante permet de désactiver le montage d'un dossier partagé (ne marche pas tout le temps directement suivant vos OS, versions d'OS, etc.) 
+ config.vm.synced_folder ".", "/vagrant", disabled: true
+end

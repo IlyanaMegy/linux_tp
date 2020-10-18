@@ -1,0 +1,13 @@
+[Unit]
+Description=backup
+
+[Service]
+Type=simple
+User=vagrant
+PIDfile=/tmp/backup.pid
+
+ExecStartPre=/home/vagrant/prebackup_gitea.sh
+ExecStart=/home/vagrant/backup_gitea.sh
+
+[Install]
+WantedBy=multi-user.target
